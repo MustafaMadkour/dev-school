@@ -1,30 +1,34 @@
 const express = require('express');
-const courseController = require('./../controllers/courseController');
+const categoryController = require('./../controllers/categoryController');
 const authController = require('../controllers/authController');
 
 const router = express.Router();
 
 router
 	.route('/')
-	.get(courseController.getAllCourses)
+	.get(categoryController.getAllCategories)
 	.post(
 		authController.protect,
 		authController.restrictTo('admin'),
-		courseController.createCourse,
+		categoryController.createCategory,
 	);
 
 router
 	.route('/:id')
-	.get(authController.protect, courseController.getCourse)
+	.get(
+		authController.protect,
+		authController.restrictTo('admin'),
+		categoryController.getCategory,
+	)
 	.patch(
 		authController.protect,
 		authController.restrictTo('admin'),
-		courseController.updateCourse,
+		categoryController.updateCategory,
 	)
 	.delete(
 		authController.protect,
 		authController.restrictTo('admin'),
-		courseController.deleteCourse,
+		categoryController.deleteCategory,
 	);
 
 module.exports = router;

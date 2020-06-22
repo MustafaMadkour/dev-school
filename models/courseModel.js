@@ -22,7 +22,7 @@ const courseSchema = new mongoose.Schema(
 		slug: String,
 		points: {
 			type: Number,
-			required: [true, 'A tour must have points'],
+			required: [true, 'A course must have points'],
 		},
 		summary: {
 			type: String,
@@ -43,6 +43,22 @@ const courseSchema = new mongoose.Schema(
 			default: Date.now(),
 			select: false,
 		},
+		isCompleted: {
+			type: Boolean,
+			default: false,
+		},
+		category: [
+			{
+				type: mongoose.Schema.ObjectId,
+				ref: 'Category',
+			},
+		],
+		// lessons: [
+		// 	{
+		// 		type: mongoose.Schema.ObjectId,
+		// 		ref: 'Lesson',
+		// 	},
+		// ],
 	},
 	{
 		toJSON: { virtuals: true },
@@ -50,13 +66,18 @@ const courseSchema = new mongoose.Schema(
 	},
 );
 
+// virtual populate
+courseSchema.virtual('lessons', {
+	ref: 'Lesson',
+	foreignField: 'course',
+	localField: '_id',
+});
+
 // DOCUMENT MIDDLEWARE: runs before .save() and .create()
 courseSchema.pre('save', function (next) {
 	this.slug = slugify(this.name, { lower: true });
 	next();
 });
-
-// QUERY MIDDLEWARE
 
 const Course = mongoose.model('Course', courseSchema);
 

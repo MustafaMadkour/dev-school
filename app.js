@@ -10,6 +10,8 @@ const AppError = require('./utils/appError');
 const globalErrorHandler = require('./controllers/errorController');
 const courseRouter = require('./routes/courseRoutes');
 const userRouter = require('./routes/userRoutes');
+const lessonRouter = require('./routes/lessonRoutes');
+const categoryRouter = require('./routes/categoryRoutes');
 
 const app = express();
 
@@ -19,14 +21,14 @@ app.use(helmet());
 
 // Development logging
 if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
+	app.use(morgan('dev'));
 }
 
 // Limit requests from same API
 const limiter = rateLimit({
-  max: 100,
-  windowMs: 60 * 60 * 1000,
-  message: 'Too many requests from this IP, please try again in an hour!'
+	max: 100,
+	windowMs: 60 * 60 * 1000,
+	message: 'Too many requests from this IP, please try again in an hour!',
 });
 app.use('/api', limiter);
 
@@ -41,13 +43,9 @@ app.use(xss());
 
 // Prevent parameter pollution
 app.use(
-  hpp({
-    whitelist: [
-      'points',
-      'createdAt',
-      'description',
-    ]
-  })
+	hpp({
+		whitelist: ['points', 'createdAt', 'description'],
+	}),
 );
 
 // Serving static files
@@ -55,17 +53,19 @@ app.use(express.static(`${__dirname}/public`));
 
 // Test middleware
 app.use((req, res, next) => {
-  req.requestTime = new Date().toISOString();
-  // console.log(req.headers);
-  next();
+	req.requestTime = new Date().toISOString();
+	// console.log(req.headers);
+	next();
 });
 
 // 3) ROUTES
 app.use('/api/v1/courses', courseRouter);
 app.use('/api/v1/users', userRouter);
+app.use('/api/v1/lessons', lessonRouter);
+app.use('/api/v1/categories', categoryRouter);
 
 app.all('*', (req, res, next) => {
-  next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+	next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
 });
 
 app.use(globalErrorHandler);
